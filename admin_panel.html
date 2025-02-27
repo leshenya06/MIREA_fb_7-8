@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+    <link rel="stylesheet" href="admin_panel_styles.css">
+</head>
+<body>
+<h1>Панель администратора</h1>
+
+<h2>Добавить товары</h2>
+<form id="addForm">
+    <div id="productFields">
+        <div class="form-group product">
+            <label>Название:</label>
+            <input type="text" class="name" required>
+            <label>Цена:</label>
+            <input type="number" class="price" required>
+            <label>Описание:</label>
+            <textarea class="description" required></textarea>
+            <label>Категории (через запятую):</label>
+            <input type="text" class="categories" required>
+        </div>
+    </div>
+    <button type="submit">Добавить товары</button>
+    <button type="button" id="addProductButton">Добавить поле</button>
+</form>
+
+<h2>Редактировать товар</h2>
+<form id="editForm">
+    <div class="form-group">
+        <label for="editId">ID товара:</label>
+        <input type="number" id="editId" required>
+    </div>
+    <div class="form-group">
+        <label for="editName">Название:</label>
+        <input type="text" id="editName">
+    </div>
+    <div class="form-group">
+        <label for="editPrice">Цена:</label>
+        <input type="number" id="editPrice">
+    </div>
+    <div class="form-group">
+        <label for="editDescription">Описание:</label>
+        <textarea id="editDescription"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="editCategories">Категории (через запятую):</label>
+        <input type="text" id="editCategories">
+    </div>
+    <button type="submit">Редактировать</button>
+</form>
+
+<h2>Удалить товар</h2>
+<form id="deleteForm">
+    <div class="form-group">
+        <label for="deleteId">ID товара:</label>
+        <input type="number" id="deleteId" required>
+    </div>
+    <button type="submit">Удалить</button>
+</form>
+
+<script>
+    // Добавление товара
+    document.getElementById('addForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const products = [];
+
+        // Получаем все товары из формы
+        const productElements = document.querySelectorAll('.product');
+        productElements.forEach(productElement => {
+            const product = {
+                name: productElement.querySelector('.name').value,
+                price: parseFloat(productElement.querySelector('.price').value),
+                description: productElement.querySelector('.description').value,
+                categories: productElement.querySelector('.categories').value.split(',').map(cat => cat.trim())
+            };
+            products.push(product);
+        });
+
+        const response = await fetch('http://localhost:8080/add', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(products) // Отправляем массив товаров
+        });
+
+        if (response.ok) {
+            alert('Товары добавлены');
+            location.reload(); // Перезагрузка страницы
+        } else {
+            alert('Ошибка при добавлении товаров');
+        }
+
+        // Очистка формы
+        document.getElementById('addForm').reset();
+        // Удаление всех динамически добавленных полей
+        const productFields = document.getElementById('productFields');
+        productFields.innerHTML = ''; // Очищаем все поля
+        productCount = 1; // Сбрасываем счетчик
+    });
+
+    // Добавление нового поля для товара
+    document.getElementById('addProductButton').addEventListener('click', () => {
+        const productFields = document.getElementById('productFields');
+        const newProduct = document.createElement('div');
+        newProduct.classList.add('form-group', 'product');
+        newProduct.innerHTML = `
+            <label>Название:</label>
+            <input type="text" class="name" required>
+            <label>Цена:</label>
+            <input type="number" class="price" required>
+            <label>Описание:</label>
+            <textarea class="description" required></textarea>
+            <label>Категории (через запятую):</label>
+            <input type="text" class="categories" required>
+        `;
+        productFields.appendChild(newProduct);
+    });
+
+    // Редактирование товара
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const product = {
+            id: parseInt(document.getElementById('editId').value)
+        };
+
+        // Добавляем только те поля, которые были изменены
+        const name = document.getElementById('editName').value;
+        if (name) {
+            product.name = name;
+        }
+
+        const price = parseFloat(document.getElementById('editPrice').value);
+        if (!isNaN(price)) {
+            product.price = price;
+        }
+
+        const description = document.getElementById('editDescription').value;
+        if (description) {
+            product.description = description;
+        }
+
+        const categories = document.getElementById('editCategories').value.split(',').map(cat => cat.trim());
+        if (categories.length > 0 && categories[0] !== "") {
+            product.categories = categories;
+        }
+
+        const response = await fetch('http://localhost:8080/edit', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(product)
+        });
+
+        if (response.ok) {
+            alert('Товар обновлен');
+            location.reload(); // Перезагрузка страницы
+        } else {
+            alert('Ошибка при обновлении товара');
+        }
+
+        // Очистка формы
+        document.getElementById('editForm').reset();
+    });
+
+    // Удаление товара
+    document.getElementById('deleteForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = parseInt(document.getElementById('deleteId').value);
+
+        const response = await fetch(`http://localhost:8080/delete?id=${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Товар удален');
+            location.reload(); // Перезагрузка страницы
+        } else {
+            alert('Ошибка при удалении товара');
+        }
+
+        // Очистка формы
+        document.getElementById('deleteForm').reset();
+    });
+</script>
+</body>
+</html>

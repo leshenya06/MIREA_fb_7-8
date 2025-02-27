@@ -1,0 +1,23 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.card {
+    border: 1px solid #ccc;
+    padding: 16px;
+    margin: 16px;
+    min-width: 200px;
+    max-width: max-content;
+    flex-grow: 1;
+    display: inline-block;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.category {
+    display: flex;
+}
+
+h1 {
+    text-align: center;
+}
