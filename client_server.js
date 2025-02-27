@@ -4,7 +4,7 @@ const path = require('path');
 
 const PORT = 3000;
 const PRODUCTS_FILE = path.join(__dirname, 'products.json');
-const STYLES_FILE = path.join(__dirname, 'client_styles.css'); // Путь к вашему CSS-файлу
+const STYLES_FILE = path.join(__dirname, 'client_styles.css');
 
 const server = http.createServer((req, res) => {
     if (req.url === '/' && req.method === 'GET') {
@@ -32,7 +32,6 @@ const server = http.createServer((req, res) => {
             res.end(html);
         });
     } else if (req.url === '/client_styles.css') {
-        // Обслуживаем CSS-файл
         fs.readFile(STYLES_FILE, (err, data) => {
             if (err) {
                 res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -49,7 +48,6 @@ const server = http.createServer((req, res) => {
 });
 
 function generateHTML(products) {
-    // Создаем объект для хранения товаров по категориям
     const categories = {};
 
     products.forEach(product => {
