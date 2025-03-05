@@ -8,9 +8,6 @@ const PRODUCTS_FILE = path.join(__dirname, 'products.json');
 const STYLES_FILE = path.join(__dirname, 'client_styles.css');
 const HTML_FILE = path.join(__dirname, 'client.html');
 
-// Загружаем данные о товарах
-const products = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
-
 // Создаем GraphQL схему
 const schema = buildSchema(`
     type Product {
@@ -28,7 +25,15 @@ const schema = buildSchema(`
 
 // Резолвер для запроса товаров
 const root = {
-    products: () => products,
+    products: () => {
+        // Читаем данные из файла при каждом запросе
+        if (fs.existsSync(PRODUCTS_FILE)) {
+            const products = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
+            // console.log('Товары загружены:', products); // Логирование
+            return products;
+        }
+        return [];
+    },
 };
 
 const server = http.createServer((req, res) => {
@@ -62,12 +67,15 @@ const server = http.createServer((req, res) => {
         });
         req.on('end', () => {
             const { query } = JSON.parse(body);
+            console.log('Получен GraphQL запрос:', query); // Логирование
             graphql(schema, query, root)
                 .then(response => {
+                    console.log('Ответ на GraphQL запрос:', response); // Логирование
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify(response));
                 })
                 .catch(error => {
+                    console.error('Ошибка при выполнении GraphQL запроса:', error); // Логирование
                     res.writeHead(500, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: 'Ошибка при выполнении запроса' }));
                 });
