@@ -62,5 +62,59 @@
       "Покупайте вместе!"
     ],
     "id": 7
+  },
+  {
+    "name": "Ещё товар",
+    "price": 100,
+    "description": "товар",
+    "categories": [
+      "Товары"
+    ],
+    "id": 8
+  },
+  {
+    "name": "Ещё товар",
+    "price": 100,
+    "description": "товар",
+    "categories": [
+      "Товары"
+    ],
+    "id": 9
+  },
+  {
+    "name": "Ещё товар",
+    "price": 100,
+    "description": "товар",
+    "categories": [
+      "Товары"
+    ],
+    "id": 10
+  },
+  {
+    "name": "Ещё товар",
+    "price": 100,
+    "description": "товар",
+    "categories": [
+      "Товары"
+    ],
+    "id": 11
+  },
+  {
+    "name": "Ещё товар",
+    "price": 100,
+    "description": "товар",
+    "categories": [
+      "Товары"
+    ],
+    "id": 12
+  },
+  {
+    "name": "Новый товар",
+    "price": 100,
+    "description": "новый товар, только что привезли",
+    "categories": [
+      "Товары"
+    ],
+    "id": 13
   }
 ]

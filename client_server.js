@@ -1,37 +1,50 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { graphql, buildSchema } = require('graphql');
 
 const PORT = 3000;
 const PRODUCTS_FILE = path.join(__dirname, 'products.json');
 const STYLES_FILE = path.join(__dirname, 'client_styles.css');
+const HTML_FILE = path.join(__dirname, 'client.html');
+
+// Загружаем данные о товарах
+const products = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
+
+// Создаем GraphQL схему
+const schema = buildSchema(`
+    type Product {
+        id: Int
+        name: String
+        price: Int
+        description: String
+        categories: [String]
+    }
+
+    type Query {
+        products: [Product]
+    }
+`);
+
+// Резолвер для запроса товаров
+const root = {
+    products: () => products,
+};
 
 const server = http.createServer((req, res) => {
     if (req.url === '/' && req.method === 'GET') {
-        fs.readFile(PRODUCTS_FILE, 'utf8', (err, data) => {
+        // Отдаем HTML-файл
+        fs.readFile(HTML_FILE, (err, data) => {
             if (err) {
                 res.writeHead(500, { 'Content-Type': 'text/plain' });
                 res.end('Internal Server Error');
                 return;
             }
-
-            let products = [];
-            if (data) {
-                try {
-                    products = JSON.parse(data);
-                } catch (parseError) {
-                    res.writeHead(500, { 'Content-Type': 'text/plain' });
-                    res.end('Error parsing JSON');
-                    return;
-                }
-            }
-
-            const html = generateHTML(products);
-
             res.writeHead(200, { 'Content-Type': 'text/html' });
-            res.end(html);
+            res.end(data);
         });
-    } else if (req.url === '/client_styles.css') {
+    } else if (req.url === '/client_styles.css' && req.method === 'GET') {
+        // Отдаем CSS-файл
         fs.readFile(STYLES_FILE, (err, data) => {
             if (err) {
                 res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -41,57 +54,29 @@ const server = http.createServer((req, res) => {
             res.writeHead(200, { 'Content-Type': 'text/css' });
             res.end(data);
         });
+    } else if (req.url === '/graphql' && req.method === 'POST') {
+        // Обработка GraphQL запросов
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+        req.on('end', () => {
+            const { query } = JSON.parse(body);
+            graphql(schema, query, root)
+                .then(response => {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(response));
+                })
+                .catch(error => {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Ошибка при выполнении запроса' }));
+                });
+        });
     } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Not Found');
     }
 });
-
-function generateHTML(products) {
-    const categories = {};
-
-    products.forEach(product => {
-        product.categories.forEach(category => {
-            if (!categories[category]) {
-                categories[category] = [];
-            }
-            categories[category].push(product);
-        });
-    });
-
-    const categorySections = Object.keys(categories).map(category => {
-        const cards = categories[category].map(product => `
-            <div class="card">
-                <h2>${product.name}</h2>
-                <p>${product.description}</p>
-                <p>Цена: ${product.price} руб.</p>
-            </div>
-        `).join('');
-
-        return `
-            <h2>${category}</h2>
-            <div class="category">
-                ${cards}
-            </div>
-        `;
-    }).join('');
-
-    return `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link rel="stylesheet" href="client_styles.css">
-            <title>Каталог товаров</title>
-        </head>
-        <body>
-            <h1>Каталог товаров</h1>
-            ${categorySections}
-        </body>
-        </html>
-    `;
-}
 
 server.listen(PORT, () => {
     console.log(`Сервер запущен на http://localhost:${PORT}`);

@@ -61,7 +61,76 @@
     <button type="submit">Удалить</button>
 </form>
 
+<!-- Боковая панель с чатом -->
+<div id="chatPanel" class="chat-panel">
+    <button id="toggleChat" onclick="toggleChat()">Чат</button>
+    <div id="chatContent" class="chat-content">
+        <div id="chatMessages"></div>
+        <div class="chat-input-container">
+            <input type="text" id="chatInput" placeholder="Введите сообщение...">
+            <button onclick="sendMessage()" class="send-button">></button>
+        </div>
+    </div>
+</div>
+
 <script>
+    // Логика для чата
+    const ws = new WebSocket('ws://localhost:8081');
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const chatMessages = document.getElementById('chatMessages');
+
+        if (data.type === 'history') {
+            // Отображаем историю сообщений
+            data.messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', message.sender);
+                messageElement.innerHTML = `
+                    <span class="sender">${message.sender === 'client' ? 'Клиент' : 'Администратор'}:</span>
+                    <span class="text">${message.text}</span>
+                `;
+                chatMessages.appendChild(messageElement);
+            });
+        } else if (data.type === 'message') {
+            // Отображаем новое сообщение
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', data.message.sender);
+            messageElement.innerHTML = `
+                <span class="sender">${data.message.sender === 'client' ? 'Клиент' : 'Администратор'}:</span>
+                <span class="text">${data.message.text}</span>
+            `;
+            chatMessages.appendChild(messageElement);
+        }
+
+        // Автопрокрутка вниз
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+
+    // Отправка сообщения
+    function sendMessage() {
+        const chatInput = document.getElementById('chatInput');
+        const message = chatInput.value.trim();
+        if (message) {
+            ws.send(JSON.stringify({ text: message, sender: 'admin' }));
+            chatInput.value = '';
+        }
+    }
+
+    // Логика для скрытия/показа боковой панели
+    function toggleChat() {
+        const chatPanel = document.getElementById('chatPanel');
+        const chatContent = document.getElementById('chatContent');
+        if (chatPanel.classList.contains('open')) {
+            chatPanel.classList.remove('open');
+            chatContent.style.display = 'none';
+        } else {
+            chatPanel.classList.add('open');
+            chatContent.style.display = 'block';
+        }
+    }
+
+    // Логика для добавления товаров
     document.getElementById('addForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const products = [];

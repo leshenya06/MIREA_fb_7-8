@@ -1,23 +1,154 @@
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
+    position: relative;
+}
+
+.category {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Карточки одинаковой ширины */
+    gap: 8px; /* Расстояние между карточками */
 }
 
 .card {
     border: 1px solid #ccc;
     padding: 16px;
-    margin: 16px;
-    min-width: 200px;
-    max-width: max-content;
-    flex-grow: 1;
-    display: inline-block;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.category {
-    display: flex;
+    box-sizing: border-box; /* Учитываем padding и border в ширине */
+    width: 100%; /* Карточки занимают всю доступную ширину */
 }
 
 h1 {
     text-align: center;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #8791ae;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 16px;
+    margin-top: 5px;
+}
+
+button:hover {
+    background-color: #526178;
+}
+
+/* Стили для боковой панели с чатом */
+.chat-panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background-color: #f4f4f4;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    transform: translateX(100%);
+}
+
+.chat-panel.open {
+    transform: translateX(0);
+}
+
+#toggleChat {
+    position: absolute; /* Возвращаем абсолютное позиционирование */
+    left: -50px;
+    top: 20px;
+    background-color: #8791ae;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 3px 0 0 3px;
+    font-size: 14px;
+}
+
+#toggleChat:hover {
+    background-color: #526178;
+}
+
+.chat-content {
+    padding: 20px;
+    display: none;
+}
+
+#chatMessages {
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 8px; /* Отступ между полем ввода и кнопкой */
+}
+
+#chatInput {
+    width: calc(100% - 90px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.send-button {
+    padding: 10px 15px; /* Уменьшаем padding, чтобы кнопка была компактной */
+    background-color: #8791ae;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 16px;
+}
+
+.send-button:hover {
+    background-color: #526178;
+}
+
+/* Стили для сообщений в чате */
+#chatMessages div {
+    padding: 8px;
+    margin-bottom: 8px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+#chatMessages .client {
+    background-color: #d2e1ff;
+}
+
+#chatMessages .admin {
+    background-color: #bdc6d1;
+}
+
+.sender {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+/* Адаптив для мобильных устройств */
+@media (max-width: 768px) {
+    .category {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Уменьшаем минимальную ширину для мобильных устройств */
+    }
+
+    .card {
+        width: 100%; /* Карточки занимают всю ширину на мобильных устройствах */
+        margin: 8px 0; /* Уменьшаем отступы */
+    }
+
+    .controls {
+        gap: 4px; /* Уменьшаем отступ между кнопками на маленьких экранах */
+    }
+
+    #toggleChat {
+        top: 10px; /* Уменьшаем отступ сверху для мобильных устройств */
+    }
 }
