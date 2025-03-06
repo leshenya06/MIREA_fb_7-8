@@ -21,7 +21,7 @@
   <div id="chatContent" class="chat-content">
     <div id="chatMessages"></div>
     <div class="chat-input-container">
-      <input type="text" id="chatInput" placeholder="Введите сообщение...">
+      <input type="text" id="chatInput" placeholder="Введите сообщение..." onkeydown="handleKeyDown(event)">
       <button onclick="sendMessage()" class="send-button">></button>
     </div>
   </div>
@@ -41,9 +41,9 @@
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', message.sender);
         messageElement.innerHTML = `
-          <span class="sender">${message.sender === 'client' ? 'Клиент' : 'Администратор'}:</span>
-          <span class="text">${message.text}</span>
-        `;
+                    <span class="sender">${message.sender === 'client' ? 'Клиент' : 'Администратор'}:</span>
+                    <span class="text">${message.text}</span>
+                `;
         chatMessages.appendChild(messageElement);
       });
     } else if (data.type === 'message') {
@@ -51,9 +51,9 @@
       const messageElement = document.createElement('div');
       messageElement.classList.add('message', data.message.sender);
       messageElement.innerHTML = `
-        <span class="sender">${data.message.sender === 'client' ? 'Клиент' : 'Администратор'}:</span>
-        <span class="text">${data.message.text}</span>
-      `;
+                <span class="sender">${data.message.sender === 'client' ? 'Клиент' : 'Администратор'}:</span>
+                <span class="text">${data.message.text}</span>
+            `;
       chatMessages.appendChild(messageElement);
     }
 
@@ -68,6 +68,13 @@
     if (message) {
       ws.send(JSON.stringify({ text: message, sender: 'client' }));
       chatInput.value = '';
+    }
+  }
+
+  // Обработка нажатия клавиши Enter
+  function handleKeyDown(event) {
+    if (event.key === 'Enter') {
+      sendMessage();
     }
   }
 
@@ -87,12 +94,12 @@
   // Остальной код для работы с товарами
   async function fetchProducts(fields = ['id', 'name', 'price', 'description', 'categories']) {
     const query = `
-                query {
-                    products {
-                        ${fields.join(' ')}
-                    }
+            query {
+                products {
+                    ${fields.join(' ')}
                 }
-            `;
+            }
+        `;
 
     const response = await fetch('/graphql', {
       method: 'POST',
@@ -132,10 +139,10 @@
         const card = document.createElement('div');
         card.classList.add('card');
         card.innerHTML = `
-                        <h2>${product.name || ''}</h2>
-                        <p>${product.description || ''}</p>
-                        <p>${product.price ? `Цена: ${product.price} руб.` : ''}</p>
-                    `;
+                    <h2>${product.name || ''}</h2>
+                    <p>${product.description || ''}</p>
+                    <p>${product.price ? `Цена: ${product.price} руб.` : ''}</p>
+                `;
         categoryContainer.appendChild(card);
       });
 

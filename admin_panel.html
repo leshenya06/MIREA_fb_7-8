@@ -67,7 +67,7 @@
     <div id="chatContent" class="chat-content">
         <div id="chatMessages"></div>
         <div class="chat-input-container">
-            <input type="text" id="chatInput" placeholder="Введите сообщение...">
+            <input type="text" id="chatInput" placeholder="Введите сообщение..." onkeydown="handleKeyDown(event)">
             <button onclick="sendMessage()" class="send-button">></button>
         </div>
     </div>
@@ -112,8 +112,14 @@
         const chatInput = document.getElementById('chatInput');
         const message = chatInput.value.trim();
         if (message) {
-            ws.send(JSON.stringify({ text: message, sender: 'admin' }));
+            ws.send(JSON.stringify({text: message, sender: 'admin'}));
             chatInput.value = '';
+        }
+    }
+
+    function handleKeyDown(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
         }
     }
 

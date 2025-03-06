@@ -20,7 +20,6 @@ wss.on('connection', (ws) => {
         const newMessage = {
             text: data.text,
             sender: data.sender, // "client" или "admin"
-            timestamp: new Date().toISOString()
         };
 
         // Добавляем новое сообщение в историю

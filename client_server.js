@@ -67,15 +67,12 @@ const server = http.createServer((req, res) => {
         });
         req.on('end', () => {
             const { query } = JSON.parse(body);
-            console.log('Получен GraphQL запрос:', query); // Логирование
             graphql(schema, query, root)
                 .then(response => {
-                    console.log('Ответ на GraphQL запрос:', response); // Логирование
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify(response));
                 })
                 .catch(error => {
-                    console.error('Ошибка при выполнении GraphQL запроса:', error); // Логирование
                     res.writeHead(500, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: 'Ошибка при выполнении запроса' }));
                 });
