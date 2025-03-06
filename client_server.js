@@ -1,7 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { graphql, buildSchema } = require('graphql');
+const {graphql, buildSchema} = require('graphql');
 
 const PORT = 3000;
 const PRODUCTS_FILE = path.join(__dirname, 'products.json');
@@ -41,22 +41,22 @@ const server = http.createServer((req, res) => {
         // Отдаем HTML-файл
         fs.readFile(HTML_FILE, (err, data) => {
             if (err) {
-                res.writeHead(500, { 'Content-Type': 'text/plain' });
+                res.writeHead(500, {'Content-Type': 'text/plain'});
                 res.end('Internal Server Error');
                 return;
             }
-            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.writeHead(200, {'Content-Type': 'text/html'});
             res.end(data);
         });
     } else if (req.url === '/client_styles.css' && req.method === 'GET') {
         // Отдаем CSS-файл
         fs.readFile(STYLES_FILE, (err, data) => {
             if (err) {
-                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.writeHead(404, {'Content-Type': 'text/plain'});
                 res.end('CSS файл не найден');
                 return;
             }
-            res.writeHead(200, { 'Content-Type': 'text/css' });
+            res.writeHead(200, {'Content-Type': 'text/css'});
             res.end(data);
         });
     } else if (req.url === '/graphql' && req.method === 'POST') {
@@ -66,19 +66,19 @@ const server = http.createServer((req, res) => {
             body += chunk.toString();
         });
         req.on('end', () => {
-            const { query } = JSON.parse(body);
+            const {query} = JSON.parse(body);
             graphql(schema, query, root)
                 .then(response => {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.writeHead(200, {'Content-Type': 'application/json'});
                     res.end(JSON.stringify(response));
                 })
                 .catch(error => {
-                    res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Ошибка при выполнении запроса' }));
+                    res.writeHead(500, {'Content-Type': 'application/json'});
+                    res.end(JSON.stringify({error: 'Ошибка при выполнении запроса'}));
                 });
         });
     } else {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.writeHead(404, {'Content-Type': 'text/plain'});
         res.end('Not Found');
     }
 });

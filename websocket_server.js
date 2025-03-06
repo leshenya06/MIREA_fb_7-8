@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const MESSAGES_FILE = path.join(__dirname, 'messages.json');
-const wss = new WebSocket.Server({ port: 8081 });
+const wss = new WebSocket.Server({port: 8081});
 
 // Загружаем сообщения из файла (если файл существует)
 let messages = [];
@@ -13,7 +13,7 @@ if (fs.existsSync(MESSAGES_FILE)) {
 
 wss.on('connection', (ws) => {
     // Отправляем историю сообщений новому клиенту
-    ws.send(JSON.stringify({ type: 'history', messages }));
+    ws.send(JSON.stringify({type: 'history', messages}));
 
     ws.on('message', (message) => {
         const data = JSON.parse(message);
@@ -31,7 +31,7 @@ wss.on('connection', (ws) => {
         // Рассылаем новое сообщение всем подключенным клиентам
         wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({ type: 'message', message: newMessage }));
+                client.send(JSON.stringify({type: 'message', message: newMessage}));
             }
         });
     });

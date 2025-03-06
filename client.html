@@ -1,99 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="client_styles.css">
-  <title>Каталог товаров</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="client_styles.css">
+    <title>Каталог товаров</title>
 </head>
 <body>
 <h1>Каталог товаров</h1>
 <div class="controls">
-  <button onclick="showAll()">Показать всё</button>
-  <button onclick="showDescriptionOnly()">Показать только описание</button>
-  <button onclick="showPriceOnly()">Показать только цену</button>
+    <button onclick="showAll()">Показать всё</button>
+    <button onclick="showDescriptionOnly()">Показать только описание</button>
+    <button onclick="showPriceOnly()">Показать только цену</button>
 </div>
 <div id="catalog"></div>
 
 <!-- Боковая панель с чатом -->
 <div id="chatPanel" class="chat-panel">
-  <button id="toggleChat" onclick="toggleChat()">Чат</button>
-  <div id="chatContent" class="chat-content">
-    <div id="chatMessages"></div>
-    <div class="chat-input-container">
-      <input type="text" id="chatInput" placeholder="Введите сообщение..." onkeydown="handleKeyDown(event)">
-      <button onclick="sendMessage()" class="send-button">></button>
+    <button id="toggleChat" onclick="toggleChat()">Чат</button>
+    <div id="chatContent" class="chat-content">
+        <div id="chatMessages"></div>
+        <div class="chat-input-container">
+            <input type="text" id="chatInput" placeholder="Введите сообщение..." onkeydown="handleKeyDown(event)">
+            <button onclick="sendMessage()" class="send-button">></button>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-  const ws = new WebSocket('ws://localhost:8081');
+    const ws = new WebSocket('ws://localhost:8081');
 
-  // Обработка входящих сообщений
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    const chatMessages = document.getElementById('chatMessages');
+    // Обработка входящих сообщений
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const chatMessages = document.getElementById('chatMessages');
 
-    if (data.type === 'history') {
-      // Отображаем историю сообщений
-      data.messages.forEach(message => {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message', message.sender);
-        messageElement.innerHTML = `
+        if (data.type === 'history') {
+            // Отображаем историю сообщений
+            data.messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', message.sender);
+                messageElement.innerHTML = `
                     <span class="sender">${message.sender === 'client' ? 'Клиент' : 'Администратор'}:</span>
                     <span class="text">${message.text}</span>
                 `;
-        chatMessages.appendChild(messageElement);
-      });
-    } else if (data.type === 'message') {
-      // Отображаем новое сообщение
-      const messageElement = document.createElement('div');
-      messageElement.classList.add('message', data.message.sender);
-      messageElement.innerHTML = `
+                chatMessages.appendChild(messageElement);
+            });
+        } else if (data.type === 'message') {
+            // Отображаем новое сообщение
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', data.message.sender);
+            messageElement.innerHTML = `
                 <span class="sender">${data.message.sender === 'client' ? 'Клиент' : 'Администратор'}:</span>
                 <span class="text">${data.message.text}</span>
             `;
-      chatMessages.appendChild(messageElement);
+            chatMessages.appendChild(messageElement);
+        }
+
+        // Автопрокрутка вниз
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+
+    // Отправка сообщения
+    function sendMessage() {
+        const chatInput = document.getElementById('chatInput');
+        const message = chatInput.value.trim();
+        if (message) {
+            ws.send(JSON.stringify({text: message, sender: 'client'}));
+            chatInput.value = '';
+        }
     }
 
-    // Автопрокрутка вниз
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  };
-
-  // Отправка сообщения
-  function sendMessage() {
-    const chatInput = document.getElementById('chatInput');
-    const message = chatInput.value.trim();
-    if (message) {
-      ws.send(JSON.stringify({ text: message, sender: 'client' }));
-      chatInput.value = '';
+    // Обработка нажатия клавиши Enter
+    function handleKeyDown(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
     }
-  }
 
-  // Обработка нажатия клавиши Enter
-  function handleKeyDown(event) {
-    if (event.key === 'Enter') {
-      sendMessage();
+    // Логика для скрытия/показа боковой панели
+    function toggleChat() {
+        const chatPanel = document.getElementById('chatPanel');
+        const chatContent = document.getElementById('chatContent');
+        if (chatPanel.classList.contains('open')) {
+            chatPanel.classList.remove('open');
+            chatContent.style.display = 'none';
+        } else {
+            chatPanel.classList.add('open');
+            chatContent.style.display = 'block';
+        }
     }
-  }
 
-  // Логика для скрытия/показа боковой панели
-  function toggleChat() {
-    const chatPanel = document.getElementById('chatPanel');
-    const chatContent = document.getElementById('chatContent');
-    if (chatPanel.classList.contains('open')) {
-      chatPanel.classList.remove('open');
-      chatContent.style.display = 'none';
-    } else {
-      chatPanel.classList.add('open');
-      chatContent.style.display = 'block';
-    }
-  }
-
-  // Остальной код для работы с товарами
-  async function fetchProducts(fields = ['id', 'name', 'price', 'description', 'categories']) {
-    const query = `
+    // Остальной код для работы с товарами
+    async function fetchProducts(fields = ['id', 'name', 'price', 'description', 'categories']) {
+        const query = `
             query {
                 products {
                     ${fields.join(' ')}
@@ -101,71 +101,71 @@
             }
         `;
 
-    const response = await fetch('/graphql', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
-    });
+        const response = await fetch('/graphql', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({query})
+        });
 
-    const result = await response.json();
-    displayProducts(result.data.products);
-  }
+        const result = await response.json();
+        displayProducts(result.data.products);
+    }
 
-  function displayProducts(products) {
-    const catalog = document.getElementById('catalog');
-    catalog.innerHTML = ''; // Очищаем каталог перед обновлением
+    function displayProducts(products) {
+        const catalog = document.getElementById('catalog');
+        catalog.innerHTML = ''; // Очищаем каталог перед обновлением
 
-    const categories = {};
+        const categories = {};
 
-    // Группируем товары по категориям
-    products.forEach(product => {
-      product.categories.forEach(category => {
-        if (!categories[category]) {
-          categories[category] = [];
-        }
-        categories[category].push(product);
-      });
-    });
+        // Группируем товары по категориям
+        products.forEach(product => {
+            product.categories.forEach(category => {
+                if (!categories[category]) {
+                    categories[category] = [];
+                }
+                categories[category].push(product);
+            });
+        });
 
-    // Создаем HTML для каждой категории
-    for (const [category, products] of Object.entries(categories)) {
-      const categorySection = document.createElement('div');
-      categorySection.innerHTML = `<h2>${category}</h2>`;
+        // Создаем HTML для каждой категории
+        for (const [category, products] of Object.entries(categories)) {
+            const categorySection = document.createElement('div');
+            categorySection.innerHTML = `<h2>${category}</h2>`;
 
-      const categoryContainer = document.createElement('div');
-      categoryContainer.classList.add('category');
+            const categoryContainer = document.createElement('div');
+            categoryContainer.classList.add('category');
 
-      products.forEach(product => {
-        const card = document.createElement('div');
-        card.classList.add('card');
-        card.innerHTML = `
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.innerHTML = `
                     <h2>${product.name || ''}</h2>
                     <p>${product.description || ''}</p>
                     <p>${product.price ? `Цена: ${product.price} руб.` : ''}</p>
                 `;
-        categoryContainer.appendChild(card);
-      });
+                categoryContainer.appendChild(card);
+            });
 
-      categorySection.appendChild(categoryContainer);
-      catalog.appendChild(categorySection);
+            categorySection.appendChild(categoryContainer);
+            catalog.appendChild(categorySection);
+        }
     }
-  }
 
-  // Функции для кнопок
-  function showAll() {
-    fetchProducts(['id', 'name', 'price', 'description', 'categories']);
-  }
+    // Функции для кнопок
+    function showAll() {
+        fetchProducts(['id', 'name', 'price', 'description', 'categories']);
+    }
 
-  function showDescriptionOnly() {
-    fetchProducts(['id', 'name', 'description', 'categories']);
-  }
+    function showDescriptionOnly() {
+        fetchProducts(['id', 'name', 'description', 'categories']);
+    }
 
-  function showPriceOnly() {
-    fetchProducts(['id', 'name', 'price', 'categories']);
-  }
+    function showPriceOnly() {
+        fetchProducts(['id', 'name', 'price', 'categories']);
+    }
 
-  // Загружаем все товары при загрузке страницы
-  fetchProducts();
+    // Загружаем все товары при загрузке страницы
+    fetchProducts();
 </script>
 </body>
 </html>

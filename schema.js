@@ -1,4 +1,4 @@
-const { GraphQLObjectType, GraphQLSchema, GraphQLList, GraphQLString, GraphQLInt } = require('graphql');
+const {GraphQLObjectType, GraphQLSchema, GraphQLList, GraphQLString, GraphQLInt} = require('graphql');
 const fs = require('fs');
 const path = require('path');
 
@@ -7,11 +7,11 @@ const PRODUCTS_FILE = path.join(__dirname, 'products.json');
 const ProductType = new GraphQLObjectType({
     name: 'Product',
     fields: {
-        id: { type: GraphQLInt },
-        name: { type: GraphQLString },
-        price: { type: GraphQLInt },
-        description: { type: GraphQLString },
-        categories: { type: new GraphQLList(GraphQLString) }
+        id: {type: GraphQLInt},
+        name: {type: GraphQLString},
+        price: {type: GraphQLInt},
+        description: {type: GraphQLString},
+        categories: {type: new GraphQLList(GraphQLString)}
     }
 });
 
@@ -21,7 +21,7 @@ const RootQuery = new GraphQLObjectType({
         products: {
             type: new GraphQLList(ProductType),
             args: {
-                fields: { type: new GraphQLList(GraphQLString) }
+                fields: {type: new GraphQLList(GraphQLString)}
             },
             resolve(parent, args) {
                 const products = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
